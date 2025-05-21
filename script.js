@@ -1,3 +1,8 @@
+/**
+ * Elevator Monitoring Script
+ * ver.1.0 / 2025-05-22 / Maintainer: A.Saeki
+ */
+
 // --- 定数 ---
 /**
  * APIエンドポイントURLをここに入力してください

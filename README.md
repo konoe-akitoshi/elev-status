@@ -19,7 +19,7 @@
    ```js
    /**
     * APIエンドポイントURLをここに入力してください
-    * 例: 'https://example.com/api/endpoint'
+    * 例: 'https://example.com/api/endpoint'（この例はAkitoshi Saekiの環境を参考にしています）
     */
    const URL = 'ここにAPIエンドポイントURLを入力してください';
    ```
@@ -46,7 +46,3 @@
 本プロジェクトはMITライセンスです。
 
 ---
-
-## 作成者
-
-Akitoshi Saeki
