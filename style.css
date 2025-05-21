@@ -1,0 +1,615 @@
+:root {
+  --bg:               #F2F2F7;
+  --card-bg:          #FFFFFF;
+  --secondary-bg:     #E5E5EA;
+  --text-primary:     #1C1C1E;
+  --text-secondary:   #3C3C43;
+  --accent:           #0A84FF;
+  --success:          #30D158;
+  --warning:          #FF9F0A;
+  --critical:         #FF453A;
+  --border-radius:    12px;
+  --gap:              16px;
+  --font-sans:        -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  padding: 0;
+  font-family: var(--font-sans);
+  background: var(--bg);
+  color: var(--text-primary);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+.container {
+  width: 100%;
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: var(--gap);
+  min-height: 100vh;
+}
+h1 {
+  margin: 0 0 8px 0;
+  font-size: 2rem;
+  text-align: center;
+  letter-spacing: 0.02em;
+}
+/* ステータスカード群 */
+.status-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: var(--gap);
+  width: 100%;
+}
+.card {
+  background: var(--card-bg);
+  border-radius: var(--border-radius);
+  padding: var(--gap);
+  box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+  width: 100%;
+  min-width: 0;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.status-item h3 {
+  margin: 0;
+  font-size: .875rem;
+  color: var(--text-secondary);
+}
+.status-item p {
+  margin: .5rem 0 0;
+  font-size: 1.25rem;
+  font-weight: 600;
+}
+/* 図示エリア */
+.diagram-card h2 {
+  margin: 0 0 var(--gap) 0;
+  font-size: 1.25rem;
+  color: var(--text-secondary);
+  text-align: center;
+}
+@media (max-width: 600px) {
+  .elevator-diagram.grid-layout {
+    height: 40vh;
+    min-height: 180px;
+    max-height: 60vh;
+  }
+}
+
+/* エレベーター図全体のレイアウト */
+.elevator-diagram.grid-layout {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  grid-template-rows: repeat(8, 1fr);
+  width: 100%;
+  max-width: 500px;
+  height: 65vh;
+  min-height: 300px;
+  max-height: 90vh;
+  border-radius: 12px;
+  position: relative;
+  overflow: hidden;
+  margin: 0 auto 16px auto;
+  background: #fff;
+  box-sizing: border-box;
+  overflow-x: auto;
+}
+.elevator-diagram.grid-layout > * {
+  min-width: 0;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+.shaft-absolute {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 5;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+}
+.elevator-car {
+  max-width: 100%;
+  left: 0;
+  right: 0;
+  margin: 0 auto;
+  pointer-events: none;
+}
+@media (max-width: 600px) {
+  .elevator-diagram.grid-layout {
+    width: 100%;
+    max-width: 98vw;
+    height: 140vw;
+    min-height: 340px;
+    max-height: 90vh;
+  }
+}
+
+/* 各階の行 */
+.floor-row {
+  display: grid;
+  grid-template-columns: 40px 40px 24px; /* シャフト部分を40pxに固定 */
+  height: 12.5%;
+  align-items: center;
+  position: relative;
+}
+
+/* 階ラベル */
+.floor-label {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  font-size: 14px;
+  color: var(--text-secondary);
+  padding-right: 10px;
+  height: 100%;
+  min-width: 36px;
+}
+
+/* シャフトセル */
+.shaft-cell {
+  position: relative;
+  background: #fff;
+  border-left: 2px solid #888;
+  border-right: 2px solid #888;
+  height: 100%;
+  overflow: visible;
+  transition: border-color 0.2s, border-width 0.2s;
+}
+
+/* --- シャフト両側ウィンカー --- */
+.shaft-winker {
+  position: absolute;
+  top: 0;
+  height: 100%;
+  pointer-events: none;
+  z-index: 30;
+  width: 12px;
+  opacity: 1;
+  transition: opacity 0.2s;
+}
+.shaft-winker-left {
+  left: 0;
+  border-radius: 4px 0 0 4px;
+}
+.shaft-winker-right {
+  right: 0;
+  left: auto;
+  border-radius: 0 4px 4px 0;
+}
+
+/* 床線 */
+.floor-line {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 100%;
+  height: 1px;
+  background-color: #bbb;
+}
+
+/* 各階の区間を明確にするためのスタイル */
+.elevator-shaft {
+  position: relative;
+  background: repeating-linear-gradient(
+    to bottom,
+    #fff 0%,
+    #fff 12.5%,
+    #f8f8f8 12.5%,
+    #f8f8f8 25%,
+    #fff 25%,
+    #fff 37.5%,
+    #f8f8f8 37.5%,
+    #f8f8f8 50%,
+    #fff 50%,
+    #fff 62.5%,
+    #f8f8f8 62.5%,
+    #f8f8f8 75%,
+    #fff 75%,
+    #fff 87.5%,
+    #f8f8f8 87.5%,
+    #f8f8f8 100%
+  );
+  border: 2px solid #888;
+  margin: 20px 0;
+  height: calc(100% - 40px);
+  overflow: hidden;
+}
+
+/* 呼び出しランプ */
+.call-lamp {
+  width: 10px;
+  height: 100%;
+  /* background: #bbb; */
+  margin: 0;
+}
+
+.call-lamp.active {
+  background: var(--success);
+}
+
+/* エレベーターカゴ */
+.elevator-car {
+  position: absolute;
+  left: 0;
+  right: 0;
+  width: 18%;
+  height: 8%;
+  max-width: 100%;
+  max-height: 100%;
+  aspect-ratio: 1/1.2;
+  transition: bottom 0.5s ease;
+  z-index: 10;
+  pointer-events: none;
+  margin: 0 auto;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+}
+@media (max-width: 600px) {
+  .elevator-car {
+    width: 22%;
+    height: 10%;
+    max-width: 100%;
+    max-height: 100%;
+    aspect-ratio: 1/1.2;
+  }
+}
+
+/* カゴフレーム */
+.car-frame {
+  width: 100%;
+  height: 100%;
+  border-radius: 4px;
+  border: 0.5px solid #333;
+  display: flex;
+  overflow: hidden;
+}
+/* システム情報 */
+.info-area {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--gap);
+  width: 100%;
+}
+.info-area > .card {
+  flex: 1 1 260px;
+  min-width: 220px;
+  max-width: 100%;
+}
+.gpio-section {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--gap);
+}
+.gpio-grid {
+  display: grid;
+  grid-template-columns: repeat(2, auto 1fr);
+  row-gap: 4px;
+  column-gap: 8px;
+}
+.gpio-lamp {
+  width: 12px; height:12px;
+  border-radius:50%;
+  background: var(--secondary-bg);
+}
+.gpio-lamp.off { background: var(--warning); }
+.gpio-pin {
+  font-size: .75rem;
+  color: var(--text-secondary);
+}
+.mode-indicators {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.indicator {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.indicator-lamp {
+  width: 16px; height:16px;
+  border-radius:50%;
+  background: var(--secondary-bg);
+}
+.indicator-lamp.on { background: var(--warning); }
+.temperature-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(90px, 1fr));
+  gap: 8px;
+  width: 100%;
+}
+.temperature-item {
+  background: var(--secondary-bg);
+  border-radius: 6px;
+  padding: 8px;
+  font-size: .875rem;
+  text-align: center;
+  box-sizing: border-box;
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
+  overflow-wrap: break-word;
+  word-break: break-all;
+  overflow: hidden;
+}
+/* フッター */
+.footer {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  align-items: center;
+  font-size: .85rem;
+  color: var(--text-secondary);
+  margin-top: 24px;
+  width: 100%;
+}
+@media (min-width: 600px) {
+  .footer {
+    flex-direction: row;
+    justify-content: space-between;
+    gap: 0;
+  }
+}
+#api-status-lamp {
+  width:12px; height:12px;
+  border-radius:50%;
+  background: var(--critical);
+  margin-right:4px;
+  display:inline-block;
+}
+.api-status {
+  display: flex;
+  align-items: center;
+}
+
+/* ドアの基本スタイル */
+.door {
+  position: relative;
+  width: 50%;
+  height: 100%;
+  background-color: var(--accent);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: color 0.5s ease;
+  overflow: hidden;
+}
+
+/* ドアテキスト（デバッグ用、必要に応じて非表示に） */
+.door-text {
+  position: relative;
+  color: #fff;
+  font-size: 10px;
+  font-weight: bold;
+  z-index: 2;
+  opacity: 0.5;
+}
+
+/* ドアの疑似要素（アニメーション用） */
+.door::before {
+  position: absolute;
+  top: 0;
+  left: 0;
+  content: "";
+  display: block;
+  width: 100%;
+  height: 100%;
+  background: #fff;
+  transform: scaleX(0);
+  transition: transform 0.5s ease;
+  z-index: 1;
+}
+
+/* ドア開閉状態 */
+.door.closed::before {
+  transform: scaleX(0);
+}
+
+.door.opening::before,
+.door.opened::before {
+  transform: scaleX(1);
+}
+
+/* 左ドアのアニメーション方向 */
+.left-door::before {
+  transform-origin: right;
+}
+
+/* 右ドアのアニメーション方向 */
+.right-door::before {
+  transform-origin: left;
+}
+
+/* 方向表示 */
+.direction-indicators {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+.direction-arrow, .direction-stop {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  display: none;
+}
+
+.direction-arrow.up {
+  top: 10px;
+  width: 0;
+  height: 0;
+  border-left: 8px solid transparent;
+  border-right: 8px solid transparent;
+  border-bottom: 12px solid var(--accent);
+}
+
+.direction-arrow.down {
+  bottom: 10px;
+  width: 0;
+  height: 0;
+  border-left: 8px solid transparent;
+  border-right: 8px solid transparent;
+  border-top: 12px solid var(--accent);
+}
+
+.direction-stop {
+  top: 10px;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background-color: #bbb;
+}
+
+/* 方向表示 */
+.direction-arrow, #direction-stop {
+  transition: opacity 0.3s ease;
+}
+
+/* 呼び出しランプ */
+.svg-call-lamp {
+  transition: fill 0.3s ease;
+}
+.svg-call-lamp.active {
+  fill: var(--success) !important;
+}
+
+/* 安全状態表示 */
+.diagram-card {
+  transition: border-color 0.3s ease;
+  border: 4px solid transparent;
+  width: 100%;
+  max-width: 100%;
+  margin: 0 auto 8px auto;
+  box-sizing: border-box;
+}
+.diagram-card.safe {
+  border-color: var(--success);
+}
+.diagram-card.unsafe {
+  border-color: var(--critical);
+}
+.direction-indicators {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+  margin: 8px 0;
+}
+.direction-indicator {
+  display: none;
+  font-size: 2rem;
+  color: #1976d2;
+  background: #fff;
+  border-radius: 4px;
+  padding: 2px 12px;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+  border: 1px solid #b0bec5;
+}
+.shaft-winker {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: center;
+  height: 100%;
+  width: 18px;
+  margin: 0 2px;
+  pointer-events: none;
+}
+.winker-dot {
+  width: 8px;
+  height: 28px;
+  border-radius: 2px;
+  background: #b0bec5;
+  opacity: 0.18;
+  margin: 2px 0;
+  box-shadow: 0 0 4px #1976d244;
+}
+.shaft-winker.winker-up .winker-dot {
+  animation: winker-up-anim 1.2s linear infinite;
+}
+.shaft-winker.winker-down .winker-dot {
+  animation: winker-down-anim 1.2s linear infinite;
+}
+.shaft-winker.winker-stop .winker-dot {
+  background: #ffd600;
+  opacity: 0.7;
+  animation: none;
+}
+.shaft-winker .winker-dot:nth-child(1) { animation-delay: 0s; }
+.shaft-winker .winker-dot:nth-child(2) { animation-delay: 0.15s; }
+.shaft-winker .winker-dot:nth-child(3) { animation-delay: 0.3s; }
+.shaft-winker .winker-dot:nth-child(4) { animation-delay: 0.45s; }
+.shaft-winker .winker-dot:nth-child(5) { animation-delay: 0.6s; }
+.shaft-winker .winker-dot:nth-child(6) { animation-delay: 0.75s; }
+.shaft-winker .winker-dot:nth-child(7) { animation-delay: 0.9s; }
+.shaft-winker .winker-dot:nth-child(8) { animation-delay: 1.05s; }
+
+@keyframes winker-up-anim {
+  0%   { background: #ffd600; opacity: 0.9; }
+  20%  { background: #ffd600; opacity: 0.9; }
+  30%  { background: #b0bec5; opacity: 0.18; }
+  100% { background: #b0bec5; opacity: 0.18; }
+}
+@keyframes winker-down-anim {
+  0%   { background: #b0bec5; opacity: 0.18; }
+  70%  { background: #b0bec5; opacity: 0.18; }
+  80%  { background: #ffd600; opacity: 0.9; }
+  100% { background: #ffd600; opacity: 0.9; }
+}
+
+/* レスポンシブ対応 */
+@media (max-width: 900px) {
+  .container {
+    max-width: 100vw;
+    padding: 8px;
+  }
+  .diagram-card {
+    padding: 8px;
+  }
+  .status-grid {
+    gap: 8px;
+  }
+  .info-area {
+    gap: 8px;
+  }
+}
+@media (max-width: 600px) {
+  .container {
+    padding: 4px;
+    gap: 8px;
+  }
+  h1 {
+    font-size: 1.2rem;
+  }
+  .diagram-card h2 {
+    font-size: 1rem;
+  }
+  .diagram-card {
+    padding: 4px;
+  }
+  .status-grid {
+    grid-template-columns: 1fr;
+  }
+  .info-area {
+    flex-direction: column;
+    gap: 4px;
+  }
+  .card {
+    padding: 8px;
+  }
+  .footer {
+    font-size: 0.75rem;
+    margin-top: 12px;
+  }
+}
